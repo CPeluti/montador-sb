@@ -39,13 +39,20 @@ map<string, Comando> initialize_commands(){
     commands["stop"] = stop;
     return commands;
 }
-
 vector<string> split(string str){
     vector<string> splitted;
     string aux = "";
     char delimiter = ' ';
     char delimiter1 = ',';
+    char operator = '+';
     for(int i = 0; i<=(int)str.size(); i++){
+        if(str[i] == operator){
+            if(aux.size()){
+                splitted.push_back(aux);
+                splitted.push_back(to_string(str[i]));
+                aux = "";
+            }
+        }
         if((str[i] != delimiter && str[i] != delimiter1) && i != (int)str.size()){
             aux += tolower(str[i]);
         } else {
@@ -94,8 +101,10 @@ vector<int> parser(string path, map<string, Comando> command_list){
             // context_data = tokens[1] == "data";
             // cout << context_data;
         } else {
+
             parsed_file.push_back(command_list[tokens[0]].opcode);   
             for(int i = 1; i < command_list[tokens[0]].size; i++){
+
                 parsed_file.push_back(tab_simbolos[tokens[i]+':']);           
             }
         }
