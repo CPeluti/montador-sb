@@ -68,9 +68,10 @@ vector<string> split(string str){
 
 vector<int> parser(string path, map<string, Comando> command_list){
     string linha;
+    regex const rgx(".+:");
     bool context_data = false;
     vector<int> parsed_file;
-    int count = 0, num_linha = 1;
+    int cont = 0, num_linha = 1, c = 0;
     map<string, int> tab_simbolos;
 
     // Primeira Passagem
@@ -78,16 +79,30 @@ vector<int> parser(string path, map<string, Comando> command_list){
     arquivo.open(path);
     while (getline (arquivo, linha)) {
         vector<string> tokens = split(linha);
-        string key = tokens[0];
-        if(key.back() == ':'){
-            tab_simbolos[key] = count;
-            tokens.erase(tokens.begin());
+
+        // Conta quantos rótulos há em cada linha
+        c = count_if(tokens.begin(), tokens.end(), [=](string s) {return regex_match(s, rgx);});
+        if(c > 1){
+            cout<< "Erro sintático??? na linha " << num_linha << ": dois rótulos definidos na mesma linha." <<endl;
+            EXIT_FAILURE;
+        } else{
+            string key = tokens[0];
+            /* if(tokens.size() > 1) {
+                cout << tokens[1] << endl;
+            } */
+            if(key.back() == ':'){
+                tab_simbolos[key] = cont;
+                tokens.erase(tokens.begin());
+            }
+            
+            cont += command_list[tokens[0]].size;
+            num_linha++;
         }
-        
-        count += command_list[tokens[0]].size;
+
     }
     arquivo.close();
-    count = 0;
+    cont = 0;
+    num_linha = 1;
 
     // Segunda Passagem
     arquivo.open(path);
