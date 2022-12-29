@@ -44,9 +44,9 @@ vector<string> split(string str){
     string aux = "";
     char delimiter = ' ';
     char delimiter1 = ',';
-    char operator = '+';
+    char oprtor = '+';
     for(int i = 0; i<=(int)str.size(); i++){
-        if(str[i] == operator){
+        if(str[i] == oprtor){
             if(aux.size()){
                 splitted.push_back(aux);
                 splitted.push_back(to_string(str[i]));
@@ -70,7 +70,7 @@ vector<int> parser(string path, map<string, Comando> command_list){
     string linha;
     bool context_data = false;
     vector<int> parsed_file;
-    int count = 0;
+    int count = 0, num_linha = 1;
     map<string, int> tab_simbolos;
 
     // Primeira Passagem
@@ -88,10 +88,13 @@ vector<int> parser(string path, map<string, Comando> command_list){
     }
     arquivo.close();
     count = 0;
+
+    // Segunda Passagem
     arquivo.open(path);
     while (getline (arquivo, linha)) {
         vector<string> tokens = split(linha);
         string key = tokens[0];
+        
         if(key.back() == ':'){
             tokens.erase(tokens.begin());
         }
@@ -101,17 +104,20 @@ vector<int> parser(string path, map<string, Comando> command_list){
             // context_data = tokens[1] == "data";
             // cout << context_data;
         } else {
-
             parsed_file.push_back(command_list[tokens[0]].opcode);   
             for(int i = 1; i < command_list[tokens[0]].size; i++){
 
-                parsed_file.push_back(tab_simbolos[tokens[i]+':']);           
+                // Checar se o rótulo se encontra definido na tabela de simbolos
+                if(tab_simbolos.find(tokens[i]+':') != tab_simbolos.end()){
+                    parsed_file.push_back(tab_simbolos[tokens[i]+':']);           
+                } else cout<< "Erro semântico na linha " << num_linha << ": rótulo \"" << tokens[i] << "\" não definido." <<endl;
+
             }
         }
-        cout << endl;
+        num_linha++;
     }   
     return parsed_file;
-    //
+
 }
 
 int main(int argc, char *argv[]){
