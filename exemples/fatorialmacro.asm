@@ -1,5 +1,5 @@
-MUL_N: MACRO 
-MUL N
+MUL_N: MACRO &oi &dois
+MUL &oi
 STORE N
 ENDMACRO
 INPUT N
