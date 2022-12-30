@@ -79,9 +79,7 @@ pair<vvs, vector<Macro>> macro_parser(vvs tokens){
                 string macro_name = tokens[i][j-1];
 
                 vector<string> params;
-                for(int nparams = 2; nparams<(int)tokens[i].size(); nparams++){
-                    params.push_back(tokens[i][nparams]);
-                }
+                params.insert(params.begin(), tokens[i].begin()+j+1, tokens[i].end());
                 
                 vvs macro_def;
                 // contador alternativo para a macro;
@@ -99,6 +97,11 @@ pair<vvs, vector<Macro>> macro_parser(vvs tokens){
                         vector<string> params1;
                         
                         map<string, string> parametros;
+                        
+                        for(int nparams = 0; nparams<(int)params.size(); nparams++){
+                            string key = params[nparams];
+                            parametros[key] = params1[nparams];
+                        }
 
                         //insere a macro nos tokens a partir da proxima linha dps de K
                         tokens.insert(tokens.begin()+k+1, macro_def.begin(), macro_def.end());
@@ -106,18 +109,15 @@ pair<vvs, vector<Macro>> macro_parser(vvs tokens){
                         m.subs.push_back({k, k+(int)macro_def.size()});
 
                         params1.insert(params1.begin(), tokens[k].begin()+1, tokens[k].end());
-
-                        for(int nparams = 0; nparams<(int)params.size(); nparams++){
-                            string key = params[nparams];
-                            parametros[key] = params1[nparams];
-                        }
                         
-                        for(int nlinha = k+1; nlinha<k+1+(int)m.def.size(); nlinha++){
+                        for(int nlinha = k+1; nlinha<(int)m.def.size(); nlinha++){
                             
                             for(int ncoluna = 0; ncoluna<(int)tokens[nlinha].size(); ncoluna++){
-                                // tokens[nlinha][ncoluna] = parametro
-                                if(tokens[nlinha][ncoluna][0] == '&'){
-                                   tokens[nlinha][ncoluna] = parametros[tokens[nlinha][ncoluna]];
+                                
+                                //par = parametro
+                                string par = tokens[nlinha][ncoluna];
+                                if(par[0] == '&'){
+                                   par = parametros[par];
                                 }
                             }
 
@@ -134,18 +134,10 @@ pair<vvs, vector<Macro>> macro_parser(vvs tokens){
         }
 
     }
-    // for(int i = 0; i<(int)tokens.size(); i++){
-        // if(tokens[i][1] == "macro"){
-            // while(tokens[i][0] != "endmacro"){
-                // cout << tokens[i][0];
-                // i++;
-                // tokens.erase(tokens.begin()+i);
-            // }
-            // tokens.erase(tokens.begin()+i);
-        // }
-        
-        // tokens.erase(tokens.begin()+m.linha_def, tokens.begin()+m.linha_def+(int)m.def.size()+2);
-    // }
+    for(int i = 0; i<(int)macros.size(); i++){
+        Macro m = macros[i];
+        tokens.erase(tokens.begin()+m.linha_def, tokens.begin()+m.linha_def+(int)m.def.size()+1);
+    }
     return {tokens, macros};
 
 }
@@ -157,11 +149,11 @@ vvs preprocesser(vvs tokens, char flag){
 
     pair<vvs, vector<Macro>> res = macro_parser(tokens);
     tokens = res.first;
-    // for(int i = 0; i<(int)tokens.size(); i++){
-    //     for(int j = 0; j<(int)tokens[i].size(); j++){
-    //         cout << tokens[i][j] << endl;
-    //     }
-    // }
+    for(int i = 0; i<(int)tokens.size(); i++){
+        for(int j = 0; j<(int)tokens[i].size(); j++){
+            cout << tokens[i][j] << endl;
+        }
+    }
     vector<Macro> macros = res.second;
 }
 
