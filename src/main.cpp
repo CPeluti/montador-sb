@@ -28,7 +28,7 @@ map<string, Comando> initialize_commands(){
     commands["section"] = diretiva;
     commands["add"] = add;
     commands["sub"] = sub;
-    commands["mult"] = mul;
+    commands["mul"] = mul;
     commands["div"] = div;
     commands["jmp"] = jmp;
     commands["jmpn"] = jmpn;
@@ -134,35 +134,39 @@ pair<vvs, vector<Macro>> macro_parser(vvs tokens){
         }
 
     }
-    // for(int i = 0; i<(int)tokens.size(); i++){
-        // if(tokens[i][1] == "macro"){
-            // while(tokens[i][0] != "endmacro"){
-                // cout << tokens[i][0];
-                // i++;
-                // tokens.erase(tokens.begin()+i);
-            // }
-            // tokens.erase(tokens.begin()+i);
-        // }
+    vvs final_tokens;
+    for(int i = 0; i<(int)tokens.size(); i++){
+        if(tokens[i].size() > 1 && tokens[i][1] == "macro"){
+            while(tokens[i][0] != "endmacro"){
+                i++;
+            }
+        } else {
+            final_tokens.push_back(tokens[i]);
+        }
+
         
-        // tokens.erase(tokens.begin()+m.linha_def, tokens.begin()+m.linha_def+(int)m.def.size()+2);
-    // }
-    return {tokens, macros};
+    }
+    return {final_tokens, macros};
 
 }
 // vvs equif_parser(vvs tokens){
 
 // }
 
-vvs preprocesser(vvs tokens, char flag){
+pair<vvs, vector<Macro>> preprocesser(vvs tokens, char flag){
+    switch(flag){
+        case 'p':
+        
+            break;
+        case 'm':
+            return macro_parser(tokens);
+            break;
+        default:
+            return macro_parser(tokens);
+            break;
 
-    pair<vvs, vector<Macro>> res = macro_parser(tokens);
-    tokens = res.first;
-    // for(int i = 0; i<(int)tokens.size(); i++){
-    //     for(int j = 0; j<(int)tokens[i].size(); j++){
-    //         cout << tokens[i][j] << endl;
-    //     }
-    // }
-    vector<Macro> macros = res.second;
+    }
+    
 }
 
 vvs tokenizer(string path){
@@ -178,70 +182,64 @@ vvs tokenizer(string path){
     return output;
 }
 
-// vector<int> parser(string path, map<string, Comando> command_list){
-//     string linha;
-//     bool context_data = false;
-//     vector<int> parsed_file;
-//     int count = 0, num_linha = 1;
-//     map<string, int> tab_simbolos;
+vector<int> parser(pair<vvs, vector<Macro>> preprocessed_file, map<string, Comando> command_list){
+    string linha;
+    bool context_data = false;
+    vector<int> parsed_file;
+    int cont = 0, num_linha = 1;
+    map<string, int> tab_simbolos;
 
-//     // Primeira Passagem
-//     while (getline (arquivo, linha)) {
-//         vector<string> tokens = split(linha);
-//         string key = tokens[0];
-//         if(key.back() == ':'){
-//             tab_simbolos[key] = count;
-//             tokens.erase(tokens.begin());
-//         }
+    // Primeira Passagem
+    vvs tokens = preprocessed_file.first;
+    for(auto i = 0; i<tokens.size(); i++){
+        string key = tokens[i][0];
+        if(key.back() == ':'){
+            tab_simbolos[key] = cont;
+            tokens[i].erase(tokens[i].begin());
+        }
+        cont += command_list[tokens[i][0]].size;
+
+    }
+    // Segunda Passagem
+
+    for(auto i = 0; i<tokens.size(); i++){
         
-//         count += command_list[tokens[0]].size;
-//     }
-//     arquivo.close();
-//     count = 0;
+        if(tokens[i][0] == "const"){
+            parsed_file.push_back(tokens[i][1][0] - '0');
+        } else if (tokens[i][0] == "section") {
+            // context_data = tokens[i][1] == "data";
+            // cout << context_data;
+        } else {
+            parsed_file.push_back(command_list[tokens[i][0]].opcode);   
+            for(int j = 1; j < command_list[tokens[i][0]].size; j++){
 
-//     // Segunda Passagem
-//     arquivo.open(path);
-//     while (getline (arquivo, linha)) {
-//         vector<string> tokens = split(linha);
-//         string key = tokens[0];
-        
-//         if(key.back() == ':'){
-//             tokens.erase(tokens.begin());
-//         }
-//         if(tokens[0] == "const"){
-//             parsed_file.push_back(tokens[1][0] - '0');
-//         } else if (tokens[0] == "section") {
-//             // context_data = tokens[1] == "data";
-//             // cout << context_data;
-//         } else {
-//             parsed_file.push_back(command_list[tokens[0]].opcode);   
-//             for(int i = 1; i < command_list[tokens[0]].size; i++){
+                // Checar se o rótulo se encontra definido na tabela de simbolos
+                if(tab_simbolos.find(tokens[i][j]+':') != tab_simbolos.end()){
+                    parsed_file.push_back(tab_simbolos[tokens[i][j]+':']);           
+                } else cout<< "Erro semântico na linha " << num_linha << ": rótulo \"" << tokens[i][j] << "\" não definido." <<endl;
 
-//                 // Checar se o rótulo se encontra definido na tabela de simbolos
-//                 if(tab_simbolos.find(tokens[i]+':') != tab_simbolos.end()){
-//                     parsed_file.push_back(tab_simbolos[tokens[i]+':']);           
-//                 } else cout<< "Erro semântico na linha " << num_linha << ": rótulo \"" << tokens[i] << "\" não definido." <<endl;
+            }
+        }
+        num_linha++;
 
-//             }
-//         }
-//         num_linha++;
-//     }   
-//     return parsed_file;
+    }
 
-// }
+    return parsed_file;
+
+}
 
 int main(int argc, char *argv[]){
     map<string, Comando> command_list = initialize_commands();
 
     vvs tokenized_file = tokenizer(argv[argc-1]);
 
-    vvs preprocessed_file = preprocesser(tokenized_file, 'c');
-    // vector<int> new_file = parser(, command_list);
-    // ofstream output;
-    // output.open("./teste.txt");
-    // for(int i = 0; i<new_file.size(); i++){
-        // output << new_file[i] << " ";
-    // }
-    // output.close();
+    pair<vvs, vector<Macro>> preprocessed_file = preprocesser(tokenized_file, 'c');
+    vector<int> new_file = parser(preprocessed_file, command_list);
+    ofstream output;
+    output.open("./teste.txt");
+    for(int i = 0; i<new_file.size(); i++){
+        output << new_file[i] << " ";
+    }
+    output.close();
     return 0;
 }
