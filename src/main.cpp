@@ -169,12 +169,6 @@ vvs equif_parser(vvs tokens){
     //     }
     // }
 
-    for(int i = 0; i<(int)tokens.size(); i++){
-        for(int j = 0; j<(int)tokens[i].size(); j++){
-            cout << tokens[i][j] << ' ';
-        }
-        cout << endl;
-    }
     return tokens;
 }
 
@@ -204,7 +198,15 @@ vvs tokenizer(string path){
     while (getline (arquivo, linha)) {
         vector<string> tokens = split(linha);
         output.push_back(tokens);
+        
     }
+    for(int i = 0; i<(int)output.size(); i++){
+            for (auto j = 0; j < output[i].size(); j++)
+            {
+                cout<< output[i][j] << " ";
+            }
+            cout << endl;
+        }
     arquivo.close();
     return output;
 }
