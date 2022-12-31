@@ -151,23 +151,35 @@ pair<vvs, vector<Macro>> macro_parser(vvs tokens){
 vvs equif_parser(vvs tokens){
     map<string, bool> equifs;
 
-    // for(int i = 0; i<(int)tokens.size(); i++){
-        
-    //     if(tokens[i].size() > 1 && tokens[i][1] == "equ"){
-    //         if(tokens[i][2] != "0"){
-    //             equifs[tokens[i][0]] = true;
-    //         } else {
-    //             equifs[tokens[i][0]] = false;
-    //         }
-    //     }else if(tokens[i][0] == "if"){
-    //         if(equifs[tokens[i][1]] == true){
-    //             tokens.erase(tokens.begin()+i);
-    //         } else if(equifs[tokens[i][1]] == false){
-    //             tokens.erase(tokens.begin()+i);
-    //             tokens.erase(tokens.begin()+i);
-    //         }
-    //     }
-    // }
+    for(int i = 0; i<(int)tokens.size(); i++){
+
+        if(tokens[i].size() > 1 && tokens[i][1] == "equ"){
+            if(tokens[i][2] != "0"){
+                equifs[tokens[i][0]] = true;
+            } else {
+                equifs[tokens[i][0]] = false;
+            }
+            tokens.erase(tokens.begin()+i);
+            i--;
+        }else if(tokens[i][0] == "if"){
+            if(equifs[tokens[i][1]+":"] == true){
+                tokens.erase(tokens.begin()+i);
+                i--;
+            } else if(equifs[tokens[i][1]+":"] == false){
+                tokens.erase(tokens.begin()+i);
+                tokens.erase(tokens.begin()+i);
+                i--;
+            }
+        }
+    }
+
+    for(int i = 0; i<(int)tokens.size(); i++){
+        for (auto j = 0; j < tokens[i].size(); j++)
+        {
+            cout<< tokens[i][j] << " ";
+        }
+        cout << endl;
+    }
 
     return tokens;
 }
@@ -200,13 +212,7 @@ vvs tokenizer(string path){
         output.push_back(tokens);
         
     }
-    for(int i = 0; i<(int)output.size(); i++){
-            for (auto j = 0; j < output[i].size(); j++)
-            {
-                cout<< output[i][j] << " ";
-            }
-            cout << endl;
-        }
+    
     arquivo.close();
     return output;
 }
