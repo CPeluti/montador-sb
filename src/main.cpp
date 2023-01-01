@@ -259,13 +259,17 @@ vvs parser(pair<vvs, vector<Macro>> preprocessed_file, map<string, Comando> comm
                 cout<< "Erro léxico na linha " << i << ": instrução ou diretiva \"" << tokens[i][0] << "\" não definida." <<endl;
             }
             if(command_list.count(tokens[i][0])){
-                for(int j = 1; j < command_list[tokens[i][0]].size; j++){
+                // Verifica se a quantidade de argumentos está certa
+                if(tokens[i].size() == command_list[tokens[i][0]].size){
+                    for(int j = 1; j < command_list[tokens[i][0]].size; j++){
+                        // Checar se o rótulo se encontra definido na tabela de simbolos
+                        if(tab_simbolos.find(tokens[i][j]+':') != tab_simbolos.end()){
+                            parsed_file.push_back(to_string(tab_simbolos[tokens[i][j]+':']));           
+                        } else cout<< "Erro semântico na linha " << i << ": rótulo \"" << tokens[i][j] << "\" não definido." <<endl;
 
-                    // Checar se o rótulo se encontra definido na tabela de simbolos
-                    if(tab_simbolos.find(tokens[i][j]+':') != tab_simbolos.end()){
-                        parsed_file.push_back(to_string(tab_simbolos[tokens[i][j]+':']));           
-                    } else cout<< "Erro semântico na linha " << i << ": rótulo \"" << tokens[i][j] << "\" não definido." <<endl;
-
+                    }
+                } else{
+                    cout<< "Erro sintático na linha " << i << ": quantidade de argumentos de \"" << tokens[i][0] << "\" incorreta." <<endl;
                 }
             }
         }
