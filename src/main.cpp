@@ -207,7 +207,7 @@ vvs tokenizer(string path){
 
 vvs parser(pair<vvs, vector<Macro>> preprocessed_file, map<string, Comando> command_list){
     string linha;
-    bool context_data = false;
+    bool context_text = false;
     vector<string> parsed_file;
     int cont = 0, c=0;
     regex const rgx(".+:");
@@ -220,7 +220,7 @@ vvs parser(pair<vvs, vector<Macro>> preprocessed_file, map<string, Comando> comm
         // Conta quantos rótulos há em cada linha
         c = count_if(tokens[i].begin(), tokens[i].end(), [=](string s) {return regex_match(s, rgx);});
         if(c > 1){
-            cout<< "Erro sintático??? na linha " << i << ": dois rótulos definidos na mesma linha." <<endl;
+            cout<< "Erro sintático na linha " << i << ": dois rótulos definidos na mesma linha." <<endl;
         } else{
             string key = tokens[i][0];
             /* if(tokens.size() > 1) {
@@ -245,8 +245,11 @@ vvs parser(pair<vvs, vector<Macro>> preprocessed_file, map<string, Comando> comm
         if(tokens[i][0] == "const"){
             parsed_file.push_back(s+tokens[i][1][0]);
         } else if (tokens[i][0] == "section") {
-            // context_data = tokens[i][1] == "data";
-            // cout << context_data;
+            if(tokens[i][1] == "text"){
+                context_text = true;
+            } else if(tokens[i][1] == "data" && context_text == false){
+                cout<< "Erro semântico na linha " << i << ": SECTION TEXT não definida." <<endl;
+            }
         } else {
             // Verificar se a instrucao ou diretiva existem
             cout << tokens[i][0] << ": "  << command_list.count(tokens[i][0]) << endl;
