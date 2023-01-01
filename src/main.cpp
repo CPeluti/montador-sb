@@ -185,21 +185,7 @@ vvs equif_parser(vvs tokens){
 }
 
 pair<vvs, vector<Macro>> preprocesser(vvs tokens, char flag){
-    vector<Macro> vm;
-    switch(flag){
-        case 'p':
-            return {equif_parser(tokens), vm};
-            break;
-        case 'm':
-            return macro_parser(tokens);
-            break;
-        default:
-            return {equif_parser(tokens), vm};
-            // return macro_parser(tokens);
-            break;
-
-    }
-    
+    return macro_parser(equif_parser(tokens));
 }
 
 vvs tokenizer(string path){
@@ -232,7 +218,9 @@ vector<int> parser(pair<vvs, vector<Macro>> preprocessed_file, map<string, Coman
             tab_simbolos[key] = cont;
             tokens[i].erase(tokens[i].begin());
         }
-        cont += command_list[tokens[i][0]].size;
+        if(command_list.count(tokens[i][0])){
+            cont += command_list[tokens[i][0]].size;
+        }
 
     }
     // Segunda Passagem
@@ -245,14 +233,22 @@ vector<int> parser(pair<vvs, vector<Macro>> preprocessed_file, map<string, Coman
             // context_data = tokens[i][1] == "data";
             // cout << context_data;
         } else {
-            parsed_file.push_back(command_list[tokens[i][0]].opcode);   
-            for(int j = 1; j < command_list[tokens[i][0]].size; j++){
+            // Verificar se a instrucao ou diretiva existem
+            cout << tokens[i][0] << ": "  << command_list.count(tokens[i][0]) << endl;
+            if(command_list.count(tokens[i][0])){
+                parsed_file.push_back(command_list[tokens[i][0]].opcode);
+            } else {
+                cout<< "Erro léxico na linha " << num_linha << ": instrução ou diretiva \"" << tokens[i][0] << "\" não definida." <<endl;
+            }
+            if(command_list.count(tokens[i][0])){
+                for(int j = 1; j < command_list[tokens[i][0]].size; j++){
 
-                // Checar se o rótulo se encontra definido na tabela de simbolos
-                if(tab_simbolos.find(tokens[i][j]+':') != tab_simbolos.end()){
-                    parsed_file.push_back(tab_simbolos[tokens[i][j]+':']);           
-                } else cout<< "Erro semântico na linha " << num_linha << ": rótulo \"" << tokens[i][j] << "\" não definido." <<endl;
+                    // Checar se o rótulo se encontra definido na tabela de simbolos
+                    if(tab_simbolos.find(tokens[i][j]+':') != tab_simbolos.end()){
+                        parsed_file.push_back(tab_simbolos[tokens[i][j]+':']);           
+                    } else cout<< "Erro semântico na linha " << num_linha << ": rótulo \"" << tokens[i][j] << "\" não definido." <<endl;
 
+                }
             }
         }
         num_linha++;
@@ -268,13 +264,49 @@ int main(int argc, char *argv[]){
 
     vvs tokenized_file = tokenizer(argv[argc-1]);
     
-    pair<vvs, vector<Macro>> preprocessed_file = preprocesser(tokenized_file, 'c');
-    vector<int> new_file = parser(preprocessed_file, command_list);
+    string file_name = argv[argc-1];
+    regex ext("\\.[a-zA-Z]+");
+    file_name = regex_replace(file_name, ext, "");
+
+    char flag = argv[argc-2][1];
     ofstream output;
-    output.open("./teste.txt");
-    for(int i = 0; i<new_file.size(); i++){
-        output << new_file[i] << " ";
+    switch(flag){
+        case 'p':{
+            vvs res= equif_parser(tokenized_file);
+            output.open(file_name+".PRE");
+            for(int i = 0; i<res.size(); i++){
+                for(int j = 0; j<res[i].size(); j++){
+                    output << res[i][j] << " ";
+                }
+                output << "\n";
+            }
+            output.close();
+            break;
+        }
+        case 'm':{
+            pair<vvs, vector<Macro>> res =  macro_parser(tokenized_file);
+            output.open(file_name+".MCR");
+            for(int i = 0; i<res.first.size(); i++){
+                for(int j = 0; j<res.first[i].size(); j++){
+                    output << res.first[i][j] << " ";
+                }
+                output << "\n";
+            }
+            output.close();
+            break;
+        }
+        default:{
+            pair<vvs, vector<Macro>> preprocessed_file = preprocesser(tokenized_file, 'c');
+            vector<int> new_file = parser(preprocessed_file, command_list);
+            output.open(file_name+".OBJ");
+            for(int i = 0; i<new_file.size(); i++){
+                output << new_file[i] << " ";
+            }
+            output.close();
+            // return macro_parser(tokens);
+            break;
+        }
     }
-    output.close();
+    
     return 0;
 }
