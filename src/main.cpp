@@ -5,6 +5,10 @@ using namespace std;
 #define vvs vector<vector<string>>
 bool erro = false;
 
+int offset_macro = 0;
+
+int offset_equif = 0;
+
 map<string, Comando> initialize_commands(){
     map<string, Comando> commands;
     Comando diretiva(0,0);
@@ -76,6 +80,7 @@ pair<vvs, vector<Macro>> macro_parser(vvs tokens){
 
         for(int j = 0; j<(int)tokens[i].size(); j++){
             if(tokens[i][j] == "macro"){
+                offset_macro++;
                 string macro_name = tokens[i][j-1];
 
                 vector<string> params;
@@ -88,8 +93,9 @@ pair<vvs, vector<Macro>> macro_parser(vvs tokens){
                 while(tokens[i1][0] != "endmacro"){
                     macro_def.push_back(tokens[i1]);
                     i1++;
+                    offset_macro++;
                 }
-
+                offset_macro++;
                 Macro m(i, macro_def);
                 
                 for(int k = i1; k<(int)tokens.size(); k++){
@@ -154,6 +160,7 @@ vvs equif_parser(vvs tokens){
     for(int i = 0; i<(int)tokens.size(); i++){
 
         if(tokens[i].size() > 1 && tokens[i][1] == "equ"){
+            offset_equif++;
             if(tokens[i][2] != "0"){
                 equifs[tokens[i][0]] = true;
             } else {
