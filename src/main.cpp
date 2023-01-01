@@ -64,7 +64,6 @@ vector<string> split(string str){
             aux += tolower(str[i]);
         } else {
             if(aux.size()){
-                // cout << aux << endl;
                 splitted.push_back(aux);
                 aux = "";
             }
@@ -176,14 +175,6 @@ vvs equif_parser(vvs tokens){
         }
     }
 
-    for(int i = 0; i<(int)tokens.size(); i++){
-        for (auto j = 0; j < tokens[i].first.size(); j++)
-        {
-            cout<< tokens[i].first[j] << " ";
-        }
-        cout << endl;
-    }
-
     return tokens;
 }
 
@@ -227,11 +218,9 @@ vvs parser(pair<vvs, vector<Macro>> preprocessed_file, map<string, Comando> comm
         c = count_if(tokens[i].first.begin(), tokens[i].first.end(), [=](string s) {return regex_match(s, rgx);});
         if(c > 1){
             cout<< "Erro sintático na linha " << tokens[i].second << ": dois rótulos definidos na mesma linha." <<endl;
+            erro = true;
         } else{
             string key = tokens[i].first[0];
-            /* if(tokens.size() > 1) {
-                cout << tokens[1] << endl;
-            } */
             if(key.back() == ':'){
                 tab_simbolos[key] = cont;
                 tokens[i].first.erase(tokens[i].first.begin());
@@ -249,38 +238,44 @@ vvs parser(pair<vvs, vector<Macro>> preprocessed_file, map<string, Comando> comm
     for(auto i = 0; i<tokens.size(); i++){
         string s="";
         if(tokens[i].first[0] == "const"){
-            parsed_file.push_back(s+tokens[i][1][0]);
+            parsed_file.push_back(s+tokens[i].first[1][0]);
         } else if (tokens[i].first[0] == "section") {
-            // context_data = tokens[i][1] == "data";
-            // cout << context_data;
+            if(tokens[i].first[1] == "text"){
+                context_text = true;
+            } 
         } else {
             if(context_text == false && flg == false){
                 cout<< "Erro semântico na linha " << tokens[i].second << ": SECTION TEXT não definida." <<endl;
                 flg = true;
+                erro = true;
             }
             // Verificar se a instrucao ou diretiva existem
-            cout << tokens[i].first[0] << ": "  << command_list.count(tokens[i].first[0]) << endl;
             if(command_list.count(tokens[i].first[0])){
                 parsed_file.push_back(to_string(command_list[tokens[i].first[0]].opcode));
-            } else {
-                cout<< "Erro léxico na linha " << tokens[i].second << ": instrução ou diretiva \"" << tokens[i].first[0] << "\" não definida." <<endl;
-            }
-            if(command_list.count(tokens[i].first[0])){
-                for(int j = 1; j < command_list[tokens[i][0]].size; j++){
+                    for(int j = 1; j < tokens[i].first.size(); j++){
 
-                    // Checar se o rótulo se encontra definido na tabela de simbolos
-                    if(tab_simbolos.find(tokens[i][j]+':') != tab_simbolos.end()){
-                        parsed_file.push_back(to_string(tab_simbolos[tokens[i][j]+':']));           
-                    } else cout<< "Erro semântico na linha " << tokens[i].second << ": rótulo \"" << tokens[i].first[j] << "\" não definido." <<endl;
+                        // Checar se o rótulo se encontra definido na tabela de simbolos
+                        if(tab_simbolos.find(tokens[i].first[j]+':') != tab_simbolos.end()){
+                            parsed_file.push_back(to_string(tab_simbolos[tokens[i].first[j]+':']));           
+                        } else{
+                            cout<< "Erro semântico na linha " << tokens[i].second << ": rótulo \"" << tokens[i].first[j] << "\" não definido." <<endl;
+                            erro = true;
+                        } 
 
                     }
-                } else{
+                if(command_list[tokens[i].first[0]].size != tokens[i].first.size()){
                     cout<< "Erro sintático na linha " << tokens[i].second << ": quantidade de argumentos de \"" << tokens[i].first[0] << "\" incorreta." <<endl;
+                    erro = true;
                 }
+            } else {
+                cout<< "Erro léxico na linha " << tokens[i].second << ": instrução ou diretiva \"" << tokens[i].first[0] << "\" não definida." <<endl;
+                erro = true;
             }
+            
         }
-
     }
+
+
     vvs res;
     res.push_back({parsed_file,0});
     return res;
