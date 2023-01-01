@@ -2,7 +2,6 @@
 #include "commands/comando.h"
 #include "macros/macro.h"
 using namespace std;
-
 #define vvs vector<vector<string>>
 bool erro = false;
 
@@ -195,8 +194,9 @@ vvs tokenizer(string path){
     ifstream arquivo;
     arquivo.open(path);
     while (getline (arquivo, linha)) {
+        regex comment(";.*$");
+        linha = regex_replace(linha, comment, "");
         vector<string> tokens = split(linha);
-
         output.push_back(tokens);
         
     }
