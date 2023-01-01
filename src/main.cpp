@@ -198,10 +198,13 @@ vvs tokenizer(string path){
     arquivo.open(path);
     int count = 1;
     while (getline (arquivo, linha)) {
+        regex comment(";.*$");
+        linha = regex_replace(linha, comment, "");
         vector<string> tokens = split(linha);
         pvs p = {tokens,count};
         output.push_back(p);
         count++;
+        
     }
     
     arquivo.close();
