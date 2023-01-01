@@ -180,13 +180,13 @@ vvs equif_parser(vvs tokens){
         }
     }
 
-    for(int i = 0; i<(int)tokens.size(); i++){
-        for (auto j = 0; j < tokens[i].size(); j++)
-        {
-            cout<< tokens[i][j] << " ";
-        }
-        cout << endl;
-    }
+    // for(int i = 0; i<(int)tokens.size(); i++){
+    //     for (auto j = 0; j < tokens[i].size(); j++)
+    //     {
+    //         cout<< tokens[i][j] << " ";
+    //     }
+    //     cout << endl;
+    // }
 
     return tokens;
 }
@@ -214,7 +214,7 @@ vvs tokenizer(string path){
 
 vvs parser(pair<vvs, vector<Macro>> preprocessed_file, map<string, Comando> command_list){
     string linha;
-    bool context_text = false;
+    bool context_text = false, flg = false;
     vector<string> parsed_file;
     int cont = 0, c=0;
     regex const rgx(".+:");
@@ -227,7 +227,7 @@ vvs parser(pair<vvs, vector<Macro>> preprocessed_file, map<string, Comando> comm
         // Conta quantos rótulos há em cada linha
         c = count_if(tokens[i].begin(), tokens[i].end(), [=](string s) {return regex_match(s, rgx);});
         if(c > 1){
-            cout<< "Erro sintático na linha " << i << ": dois rótulos definidos na mesma linha." <<endl;
+            cout<< "Erro sintático na linha " << (offset_macro+offset_equif+i+1) << ": dois rótulos definidos na mesma linha." <<endl;
         } else{
             string key = tokens[i][0];
             /* if(tokens.size() > 1) {
@@ -254,16 +254,18 @@ vvs parser(pair<vvs, vector<Macro>> preprocessed_file, map<string, Comando> comm
         } else if (tokens[i][0] == "section") {
             if(tokens[i][1] == "text"){
                 context_text = true;
-            } else if(tokens[i][1] == "data" && context_text == false){
-                cout<< "Erro semântico na linha " << i << ": SECTION TEXT não definida." <<endl;
             }
         } else {
+            if(context_text == false && flg == false){
+                cout<< "Erro semântico na linha " << (offset_macro+offset_equif+i+1) << ": SECTION TEXT não definida." <<endl;
+                flg = true;
+            }
             // Verificar se a instrucao ou diretiva existem
             cout << tokens[i][0] << ": "  << command_list.count(tokens[i][0]) << endl;
             if(command_list.count(tokens[i][0])){
                 parsed_file.push_back(to_string(command_list[tokens[i][0]].opcode));
             } else {
-                cout<< "Erro léxico na linha " << i << ": instrução ou diretiva \"" << tokens[i][0] << "\" não definida." <<endl;
+                cout<< "Erro léxico na linha " << (offset_macro+offset_equif+i+1) << ": instrução ou diretiva \"" << tokens[i][0] << "\" não definida." <<endl;
             }
             if(command_list.count(tokens[i][0])){
                 // Verifica se a quantidade de argumentos está certa
@@ -272,11 +274,11 @@ vvs parser(pair<vvs, vector<Macro>> preprocessed_file, map<string, Comando> comm
                         // Checar se o rótulo se encontra definido na tabela de simbolos
                         if(tab_simbolos.find(tokens[i][j]+':') != tab_simbolos.end()){
                             parsed_file.push_back(to_string(tab_simbolos[tokens[i][j]+':']));           
-                        } else cout<< "Erro semântico na linha " << i << ": rótulo \"" << tokens[i][j] << "\" não definido." <<endl;
+                        } else cout<< "Erro semântico na linha " << (offset_macro+offset_equif+i+1) << ": rótulo \"" << tokens[i][j] << "\" não definido." <<endl;
 
                     }
                 } else{
-                    cout<< "Erro sintático na linha " << i << ": quantidade de argumentos de \"" << tokens[i][0] << "\" incorreta." <<endl;
+                    cout<< "Erro sintático na linha " << (offset_macro+offset_equif+i+1) << ": quantidade de argumentos de \"" << tokens[i][0] << "\" incorreta." <<endl;
                 }
             }
         }
