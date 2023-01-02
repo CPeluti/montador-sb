@@ -208,11 +208,19 @@ vvs parser(pair<vvs, vector<Macro>> preprocessed_file, map<string, Comando> comm
     vector<string> parsed_file;
     int cont = 0, c=0;
     regex const rgx(".+:");
+    regex const nome("^[a-zA-Z][1-9|a-zA-Z|\\_]+$");
     map<string, int> tab_simbolos;
 
     // Primeira Passagem
     vvs tokens = preprocessed_file.first;
     for(auto i = 0; i<tokens.size(); i++){
+
+        // Verifica erros léxicos nos rótulos
+        if(!regex_match(tokens[i].first[0], nome) && flg == false){
+            cout<< "Erro léxico na linha " << tokens[i].second << ": rótulo definido incorretamente." <<endl;
+            erro = true;
+            flg = true;
+        }
 
         // Conta quantos rótulos há em cada linha
         c = count_if(tokens[i].first.begin(), tokens[i].first.end(), [=](string s) {return regex_match(s, rgx);});
@@ -234,7 +242,7 @@ vvs parser(pair<vvs, vector<Macro>> preprocessed_file, map<string, Comando> comm
 
     
     // Segunda Passagem
-
+    flg = false;
     for(auto i = 0; i<tokens.size(); i++){
         string s="";
         if(tokens[i].first[0] == "const"){
