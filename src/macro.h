@@ -1,7 +1,7 @@
 #include <bits/stdc++.h>
+#define vvs vector<pair<vector<string>,int>>
 using namespace std;
 
-#define vvs vector<pair<vector<string>,int>>
 
 class Macro {
     public:

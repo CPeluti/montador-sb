@@ -1,6 +1,6 @@
 #include <bits/stdc++.h>
-#include "commands/comando.h"
-#include "macros/macro.h"
+#include "comando.h"
+#include "macro.h"
 using namespace std;
 
 #define vvs vector<pair<vector<string>,int>>
