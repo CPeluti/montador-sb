@@ -22,4 +22,4 @@ main.o: main.cpp $(H_SOURCE)
 	$(CC) -o $@ $< $(CC_FLAGS)
 
 clean:
-	rm -rf *.o $(NAME) *~
+	rm -rf src/*.o $(NAME) *~
