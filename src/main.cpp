@@ -46,21 +46,12 @@ map<string, Comando> initialize_commands(){
     return commands;
 }
 
-vector<string> split(string str){
+vector<string> split(string str, char delimiter){
     vector<string> splitted;
     string aux = "";
-    char delimiter = ' ';
-    char delimiter1 = ',';
-    char oprtor = '+';
     for(int i = 0; i<=(int)str.size(); i++){
-        if(str[i] == oprtor){
-            if(aux.size()){
-                splitted.push_back(aux);
-                splitted.push_back(to_string(str[i]));
-                aux = "";
-            }
-        }
-        if((str[i] != delimiter && str[i] != delimiter1) && i != (int)str.size()){
+
+        if(str[i] != delimiter && i != (int)str.size()){
             aux += tolower(str[i]);
         } else {
             if(aux.size()){
@@ -191,7 +182,7 @@ vvs tokenizer(string path){
     while (getline (arquivo, linha)) {
         regex comment(";.*$");
         linha = regex_replace(linha, comment, "");
-        vector<string> tokens = split(linha);
+        vector<string> tokens = split(linha, ' ');
         pvs p = {tokens,count};
         output.push_back(p);
         count++;
@@ -208,19 +199,13 @@ vvs parser(pair<vvs, vector<Macro>> preprocessed_file, map<string, Comando> comm
     vector<string> parsed_file;
     int cont = 0, c=0;
     regex const rgx(".+:");
-    regex const nome("^[a-zA-Z][1-9|a-zA-Z|\\_]+$");
+    regex const nome("^[a-zA-Z][1-9|a-zA-Z|\\_]*:$");
     map<string, int> tab_simbolos;
 
     // Primeira Passagem
     vvs tokens = preprocessed_file.first;
     for(auto i = 0; i<tokens.size(); i++){
 
-        // Verifica erros léxicos nos rótulos
-        if(!regex_match(tokens[i].first[0], nome) && flg == false){
-            cout<< "Erro léxico na linha " << tokens[i].second << ": rótulo definido incorretamente." <<endl;
-            erro = true;
-            flg = true;
-        }
 
         // Conta quantos rótulos há em cada linha
         c = count_if(tokens[i].first.begin(), tokens[i].first.end(), [=](string s) {return regex_match(s, rgx);});
@@ -230,6 +215,12 @@ vvs parser(pair<vvs, vector<Macro>> preprocessed_file, map<string, Comando> comm
         } else{
             string key = tokens[i].first[0];
             if(key.back() == ':'){
+                // Verifica erros léxicos nos rótulos
+                if(!regex_match(tokens[i].first[0], nome) && flg == false){
+                    cout<< "Erro léxico na linha " << tokens[i].second << ": rótulo definido incorretamente." <<endl;
+                    erro = true;
+                    flg = true;
+                }
                 tab_simbolos[key] = cont;
                 tokens[i].first.erase(tokens[i].first.begin());
             }
@@ -245,8 +236,30 @@ vvs parser(pair<vvs, vector<Macro>> preprocessed_file, map<string, Comando> comm
     flg = false;
     for(auto i = 0; i<tokens.size(); i++){
         string s="";
-        if(tokens[i].first[0] == "const"){
-            parsed_file.push_back(s+tokens[i].first[1][0]);
+        if(tokens[i].first[0] == "space"){
+            int j = 1;
+            if(tokens[i].first.size() > 1){
+                vector<string> s = split(tokens[i].first[1],'+');
+                if(s.size() > 1){
+                    j = stoi(s[0]) + stoi(s[1]);
+                } else{
+                    j = stoi(s[0]);
+                }
+            }
+            while(j--){
+                parsed_file.push_back("0");
+            }
+        }
+        else if(tokens[i].first[0] == "const"){
+            regex hexa("^0x[0-9a-fA-F]*");
+            regex start("^0x");
+            if(regex_match(tokens[i].first[1], hexa)){
+                string s = regex_replace(tokens[i].first[1], start, "");
+                unsigned int j = stoul(s, nullptr, 16);
+                tokens[i].first[1] = to_string(j);
+
+            }
+            parsed_file.push_back(tokens[i].first[1]);
         } else if (tokens[i].first[0] == "section") {
             if(tokens[i].first[1] == "text"){
                 context_text = true;
@@ -261,10 +274,29 @@ vvs parser(pair<vvs, vector<Macro>> preprocessed_file, map<string, Comando> comm
             if(command_list.count(tokens[i].first[0])){
                 parsed_file.push_back(to_string(command_list[tokens[i].first[0]].opcode));
                     for(int j = 1; j < tokens[i].first.size(); j++){
-
                         // Checar se o rótulo se encontra definido na tabela de simbolos
-                        if(tab_simbolos.find(tokens[i].first[j]+':') != tab_simbolos.end()){
-                            parsed_file.push_back(to_string(tab_simbolos[tokens[i].first[j]+':']));           
+                        vector<string> splitted = split(tokens[i].first[j], '+');
+                        bool flag_checked = false;
+                        if(splitted.size() > 1){
+                            if(tab_simbolos.count(splitted[0]+':') == 0 && tab_simbolos.count(splitted[1]+':')){
+                                cout<< "Erro semântico na linha " << tokens[i].second << ": rótulo \"" << tokens[i].first[j] << "\" não definido." <<endl;
+                                erro = true;
+                            }
+                            flag_checked = true;
+                        }
+                        if(tab_simbolos.count(tokens[i].first[j]+':') || flag_checked){
+                            int aux;
+                            if(splitted.size() > 1){
+                                if(tab_simbolos.count(splitted[0]+':')){
+                                    aux = tab_simbolos[splitted[0]+':'] + stoi(splitted[1]);
+                                } else {
+                                    aux += stoi(splitted[0]) + tab_simbolos[splitted[1]+':'];
+                                }
+                                tokens[i].first[j] = to_string(aux);
+                            }else{
+                                tokens[i].first[j] = to_string(tab_simbolos[tokens[i].first[j]+':']);
+                            }
+                            parsed_file.push_back(tokens[i].first[j]);           
                         } else{
                             cout<< "Erro semântico na linha " << tokens[i].second << ": rótulo \"" << tokens[i].first[j] << "\" não definido." <<endl;
                             erro = true;

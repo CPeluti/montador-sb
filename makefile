@@ -6,9 +6,7 @@ H_SOURCE=${wildcard src/*.h}
 
 OBJ=$(CPP_SOURCE:.cpp=.o)
 
-CC=g++ -std=c++17
-
-CC_FLAGS=-WALL
+CC=g++
 
 all: $(NAME)
 
