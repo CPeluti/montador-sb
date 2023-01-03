@@ -102,9 +102,8 @@ pair<vvs, vector<Macro>> macro_parser(vvs tokens){
                         tokens.insert(tokens.begin()+k+1, macro_def.begin(), macro_def.end());
 
                         m.subs.push_back({k, k+(int)macro_def.size()});
-
                         
-                        for(int nlinha = k+1; nlinha<(int)m.def.size()+k; nlinha++){
+                        for(int nlinha = k+1; nlinha<=(int)m.def.size()+k; nlinha++){
                             
                             for(int ncoluna = 0; ncoluna<(int)tokens[nlinha].first.size(); ncoluna++){
                                 
@@ -184,8 +183,10 @@ vvs tokenizer(string path){
     while (getline (arquivo, linha)) {
         regex comment(";.*$");
 		regex tab("\\t");
+        regex comma(",");
         linha = regex_replace(linha, comment, "");
 		linha = regex_replace(linha, tab, " ");
+		linha = regex_replace(linha, comma, " ");
         if(linha != ""){
             vector<string> tokens = split(linha, ' ');
             pvs p = {tokens,count};
@@ -290,15 +291,6 @@ vvs parser(pair<vvs, vector<Macro>> preprocessed_file, map<string, Comando> comm
             if(command_list.count(tokens[i].first[0])){
                 vector<string> splitted;
                 parsed_file.push_back(to_string(command_list[tokens[i].first[0]].opcode));
-                if(tokens[i].first[0] == "copy"){
-                    splitted = split(tokens[i].first[1], ',');
-					if(splitted.size() > 1){
-						tokens[i].first.pop_back();
-						for(int j = 0; j<splitted.size(); j++){
-							tokens[i].first.push_back(splitted[j]);
-						}
-					}
-                }
                 for(int j = 1; j < tokens[i].first.size(); j++){
                     // Checar se o rótulo se encontra definido na tabela de simbolos
                     splitted = split(tokens[i].first[j], '+');
