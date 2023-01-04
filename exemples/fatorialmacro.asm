@@ -1,15 +1,19 @@
-MUL_N: MACRO &1
-MUl &1 
-STORE N
+outra_macro: macro
+stop
+endmacro
+MUL_N: MACRO &a &b &c
+MUl &a
+STORE &b
+copy &a,&c
+outra_macro
 ENDMACRO
 SECTION TEXT
 INPUT N
 LOAD N
-FAT:
-SUB ONE
+FAT: SUB ONE
 JMPZ FIM
 STORE AUX
-MUL_N N
+MUL_N aux one n
 LOAD AUX
 JMP FAT
 FIM: OUTPUT N
