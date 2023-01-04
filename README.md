@@ -16,3 +16,6 @@ Para rodar o programa digite:
 
 ## Ferramenta
 O projeto foi feito com C++17
+
+## Sistema Opercional Usado
+Linux
