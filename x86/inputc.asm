@@ -15,26 +15,26 @@ _start:
     mov ebx, 0
     int 80h
 
-    input_c:
-        enter 0, 0
-        
-        mov eax, 3
-        mov ebx, 0
-        mov ecx, [ebp+8]
-        mov edx, 2          ; 2 por causa do enter
-        int 80h
+input_c:
+    enter 0, 0
+    
+    mov eax, 3
+    mov ebx, 0
+    mov ecx, [ebp+8]
+    mov edx, 2          ; 2 por causa do enter
+    int 80h
 
-        leave
-        ret 2
+    leave
+    ret 2
 
-    output_c:
-        enter 0, 0
+output_c:
+    enter 0, 0
 
-        mov eax, 4
-        mov ebx, 1
-        mov ecx, [ebp+8]
-        mov edx, 1
-        int 80h
+    mov eax, 4
+    mov ebx, 1
+    mov ecx, [ebp+8]
+    mov edx, 1
+    int 80h
 
-        leave
-        ret 2
+    leave
+    ret 2
