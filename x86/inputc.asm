@@ -25,7 +25,7 @@ input_c:
     int 80h
 
     leave
-    ret 2
+    ret 4
 
 output_c:
     enter 0, 0
@@ -37,4 +37,4 @@ output_c:
     int 80h
 
     leave
-    ret 2
+    ret 4
