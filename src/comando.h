@@ -1,7 +1,9 @@
+#include <string>
+using namespace std;
 class Comando {
     public:
         Comando();
-        Comando(int op, int s);
+        Comando(string inst, int size);
+        string inst;
         int size;
-        int opcode;
 };

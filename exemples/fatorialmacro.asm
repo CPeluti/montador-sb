@@ -1,24 +1,14 @@
-outra_macro: macro
-stop
-endmacro
-MUL_N: MACRO &a &b &c
-MUl &a
-STORE &b
-copy &a,&c
-outra_macro
-ENDMACRO
 SECTION TEXT
 INPUT N
 LOAD N
-FAT: SUB ONE
-JMPZ FIM
-STORE AUX
-MUL_N aux one n
-LOAD AUX
-JMP FAT
-FIM: OUTPUT N
+FAT: ADD ONE
 STOP
 SECTION DATA
 AUX: SPACE
 N: SPACE
 ONE: CONST 0x12
+
+;Chama input()
+;mov eax, [n]
+;add eax, [one]
+;mov eax, 1\nmov ebx, 0\nint 80h

@@ -16,7 +16,7 @@ $(NAME): $(OBJ)
 %.o: %.c %.h
 	$(CC) -o $@ $< $(CC_FLAGS)
 
-main.o: main.cpp $(H_SOURCE)
+main.o: tradutor.cpp $(H_SOURCE)
 	$(CC) -o $@ $< $(CC_FLAGS)
 
 clean:

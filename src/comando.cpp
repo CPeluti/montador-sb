@@ -1,11 +1,11 @@
 #include "comando.h"
-
+#include <string>
 using namespace std;
 
-Comando::Comando(int op, int s)
+Comando::Comando(string inst, int size)
 {
-    this->opcode = op;
-    this->size = s;
+    this->inst = inst;
+    this->size = size;
 }
 Comando::Comando()
 {
