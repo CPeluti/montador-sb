@@ -14,18 +14,22 @@ map<string, Comando> initialize_commands(){
     Comando space("resd &0",1);
     Comando constant("&0 &1",2);
     Comando add("add eax, [&0]",1);
-    Comando sub("",0);
-    Comando mul("",0);
-    Comando div("",0);
-    Comando jmp("",0);
-    Comando jmpn("",0);
-    Comando jmpp("",0);
-    Comando jmpz("",0);
-    Comando copy("",0);
+    Comando sub("sub eax, [&0]",1);
+    Comando mul("mov ebx, [&0]\nmul ebx",1);
+    Comando div("cdq\nmov ebx, [&0]\ndiv ebx\n",1);
+    Comando jmp("jmp &0",1);
+    Comando jmpn("cmp eax, 0\njl &0",1);
+    Comando jmpp("cmp eax, 0\njg &0",1);
+    Comando jmpz("cmp eax, 0\nje &0",1);
+    Comando copy("mov ebx, [&0]\nmov [&1], ebx",2);
     Comando load("mov eax, [&0]",1);
-    Comando store("",0);
-    Comando input("input [&0]",1);
-    Comando output("",0);
+    Comando store("mov [&0], eax",1);
+    Comando input("push eax\npush &0\ncall input\npop eax",1);
+    Comando input_c("push eax\npush &0\ncall input_c\npop eax",1);
+    Comando input_s("push eax\npush &0\npush &1\ncall input_s\npop eax",2);
+    Comando output("push eax\npush dword [&0]\ncall output\npop eax",1);
+    Comando output_c("push eax\npush &0\n call output_c\npop eax",1);
+    Comando output_s("push eax\npush &0\npush &1\ncall output_s\npop eax",2);
     Comando stop("mov eax, 1\nmov ebx, 0\nint 80h",0);
     commands["const"] = constant;
     commands["space"] = space;
@@ -201,7 +205,6 @@ vvs tokenizer(string path){
 }
 
 vs parser(pair<vvs, vector<Macro>> preprocessed_file, map<string, Comando> command_list){
-    cout << "test";
     vs text;
     vs bss;
     vs data;
@@ -278,6 +281,12 @@ vs parser(pair<vvs, vector<Macro>> preprocessed_file, map<string, Comando> comma
     final_file.push_back("section .text");
     final_file.push_back("global _start");
     // adicionar funcoes de input
+    final_file.push_back("input_c:\nenter 0, 0\nmov eax, 3\nmov ebx, 0\nmov ecx, [ebp+8]\nmov edx, 2\nint 80h\nleave\nret 4");
+    final_file.push_back("output_c:\nenter 0, 0\nmov eax, 4\nmov ebx, 1\nmov ecx, [ebp+8]\nmov edx, 2\nint 80h\nleave\nret 4");
+    final_file.push_back("input_s:\nenter 0, 0\nmov ecx, [ebp+12]\nmov edx, [ebp+8]\nmov eax, 3\nmov ebx, 0\nint 80h\nleave\nret 8");
+    final_file.push_back("output_s:\nenter 0, 0\nmov ecx, [ebp+12]\nmov edx, [ebp+8]\nmov eax, 4\nmov ebx, 1\nint 80h\nleave\nret 8");
+    final_file.push_back("input:\nenter 2, 0\npush dword 0\nmov byte [ebp-2], 0\nloop_i:\nmov ecx, ebp\ndec ecx\nmov eax, 3\nmov ebx, 0\nmov edx, 1\nint 80h\ncmp byte [ebp-1], \'-\'\njne nNegativo\nmov byte [ebp-2], 1\njmp loop_i\nnNegativo:\ncmp byte [ebp-1], 0ah\nje nPush\ncmp byte [ebp-1], 0dH\nje nPush\npop eax\nmov ecx, 10\nmul ecx\nmov ecx, [ebp-1]\nsub ecx, 0x30\nadd eax,ecx\npush eax\njmp loop_i\nnPush:\npop eax\ncmp byte [ebp-2], 1\njne fim\nneg eax\nfim:\nmov ebx, [ebp+8]\nmov [ebx], eax\nleave\nret 4");
+    final_file.push_back("output:\nenter 1,0\nmov eax, [ebp+8]\ncheck_signal:\ncmp eax, 0\njge loop_o\nmov byte [ebp-1], \'-\'\npush eax\nmov ecx, ebp\ndec ecx\nmov eax, 4\nmov ebx, 1\nmov edx, 1\nint 80h\npop eax\nneg eax\nloop_o:\nxor edx, edx\nmov ecx, 10\ndiv ecx\nadd edx, 0x30\npush edx\ncmp eax, 0\njne loop_o\nloop_print:\npop eax\nmov [ebp-1], eax\nmov ecx, ebp\ndec ecx\nmov eax, 4\nmov ebx, 1\nmov edx, 1\nint 80h\ncmp ecx, esp\njne loop_print\nleave\nret 4");
     final_file.push_back("_start:");
     for(string s : text){
         final_file.push_back(s);

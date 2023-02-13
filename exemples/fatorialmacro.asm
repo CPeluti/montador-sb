@@ -2,11 +2,13 @@ SECTION TEXT
 INPUT N
 LOAD N
 FAT: ADD ONE
+store N
+output n
 STOP
 SECTION DATA
 AUX: SPACE
 N: SPACE
-ONE: CONST 0x12
+ONE: CONST 1
 
 ;Chama input()
 ;mov eax, [n]
