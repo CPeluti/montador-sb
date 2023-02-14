@@ -1,4 +1,4 @@
-NAME=montador
+NAME=tradutor
 
 CPP_SOURCE=$(wildcard src/*.cpp)
 

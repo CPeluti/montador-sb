@@ -12,7 +12,7 @@ Para compilar digite o comando:
 ## Execução
 Para rodar o programa digite:
 
-`$ ./montador <flag> <arquivo asm>`
+`$ ./tradutor <arquivo asm>`
 
 ## Ferramenta
 O projeto foi feito com C++17
