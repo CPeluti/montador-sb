@@ -1,9 +1,13 @@
 SECTION TEXT
-INPUT_S N,10
-OUTPUT_S N,10
+INPUT N
+LOAD N
+MUL NUMERO
+STORE N
+output N
 STOP
 section DATA
-N: SPACE 10
+N: SPACE
+NUMERO: CONST 4
 
 ;Chama input()
 ;mov eax, [n]

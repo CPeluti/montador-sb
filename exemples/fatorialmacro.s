@@ -1,6 +1,7 @@
 section .bss
-n resd 10
+n resd 1
 section .data
+numero dd 4
 section .text
 global _start
 input_c:
@@ -117,13 +118,15 @@ ret 4
 _start:
 push eax
 push n
-push 10
-call input_s
+call input
 pop eax
+mov eax, [n]
+mov ebx, [numero]
+imul ebx
+mov [n], eax
 push eax
-push n
-push 10
-call output_s
+push dword [n]
+call output
 pop eax
 mov eax, 1
 mov ebx, 0

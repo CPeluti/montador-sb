@@ -15,12 +15,12 @@ map<string, Comando> initialize_commands(){
     Comando constant("&0 &1",2);
     Comando add("add eax, [&0]",1);
     Comando sub("sub eax, [&0]",1);
-    Comando mul("mov ebx, [&0]\nmul ebx",1);
-    Comando div("cdq\nmov ebx, [&0]\ndiv ebx\n",1);
-    Comando jmp("jmp &0",1);
-    Comando jmpn("cmp eax, 0\njl &0",1);
-    Comando jmpp("cmp eax, 0\njg &0",1);
-    Comando jmpz("cmp eax, 0\nje &0",1);
+    Comando mul("mov ebx, [&0]\nimul ebx",1);
+    Comando div("cdq\nmov ebx, &0\nidiv ebx\n",1);
+    Comando jmp("jmp [&0]",1);
+    Comando jmpn("cmp eax, 0\njl [&0]",1);
+    Comando jmpp("cmp eax, 0\njg [&0]",1);
+    Comando jmpz("cmp eax, 0\nje [&0]",1);
     Comando copy("mov ebx, [&0]\nmov [&1], ebx",2);
     Comando load("mov eax, [&0]",1);
     Comando store("mov [&0], eax",1);
@@ -244,8 +244,14 @@ vs parser(pair<vvs, vector<Macro>> preprocessed_file, map<string, Comando> comma
                     search = "&";
                     string counter1 = to_string(counter);
                     search+= counter1;
-                    regex ext(search);
-                    codigo_processado = regex_replace(codigo_processado, ext, s);
+                    if(s[0]-'0'>=0 && s[0]-'0'<=9 && (type != 2 && type != 1)){
+                        regex ext('['+search+']');
+                        codigo_processado = regex_replace(codigo_processado, ext, s);
+                    }
+                    else{
+                        regex ext(search);
+                        codigo_processado = regex_replace(codigo_processado, ext, (s));
+                    } 
                     counter++;
                 }
             }
