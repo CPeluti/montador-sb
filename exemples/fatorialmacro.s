@@ -1,7 +1,7 @@
 section .bss
 n resd 1
 section .data
-numero dd 4
+numero dd 2
 section .text
 global _start
 input_c:
@@ -121,8 +121,10 @@ push n
 call input
 pop eax
 mov eax, [n]
+cdq
 mov ebx, [numero]
-imul ebx
+idiv ebx
+
 mov [n], eax
 push eax
 push dword [n]

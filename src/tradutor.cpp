@@ -16,7 +16,7 @@ map<string, Comando> initialize_commands(){
     Comando add("add eax, [&0]",1);
     Comando sub("sub eax, [&0]",1);
     Comando mul("mov ebx, [&0]\nimul ebx",1);
-    Comando div("cdq\nmov ebx, &0\nidiv ebx\n",1);
+    Comando div("cdq\nmov ebx, [&0]\nidiv ebx\n",1);
     Comando jmp("jmp [&0]",1);
     Comando jmpn("cmp eax, 0\njl [&0]",1);
     Comando jmpp("cmp eax, 0\njg [&0]",1);
