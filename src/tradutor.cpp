@@ -46,6 +46,10 @@ map<string, Comando> initialize_commands(){
     commands["store"] = store;
     commands["input"] = input;
     commands["output"] = output;
+    commands["input_c"] = input_c;
+    commands["output_c"] = output_c;
+    commands["input_s"] = input_s;
+    commands["output_s"] = output_s;
     commands["stop"] = stop;
     return commands;
 }
@@ -242,6 +246,7 @@ vs parser(pair<vvs, vector<Macro>> preprocessed_file, map<string, Comando> comma
                     search+= counter1;
                     regex ext(search);
                     codigo_processado = regex_replace(codigo_processado, ext, s);
+                    counter++;
                 }
             }
         }

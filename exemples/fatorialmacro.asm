@@ -1,14 +1,9 @@
 SECTION TEXT
-INPUT N
-LOAD N
-FAT: ADD ONE
-store N
-output n
+INPUT_S N,10
+OUTPUT_S N,10
 STOP
-SECTION DATA
-AUX: SPACE
-N: SPACE
-ONE: CONST 1
+section DATA
+N: SPACE 10
 
 ;Chama input()
 ;mov eax, [n]
